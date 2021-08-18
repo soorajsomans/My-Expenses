@@ -4,13 +4,13 @@ import '../models/transaction.dart';
 
 class TransactionList extends StatelessWidget {
   final List<Transaction> transactions;
-
-  TransactionList(this.transactions);
+  final Function deleteTx;
+  TransactionList(this.transactions, this.deleteTx);
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 350,
+      height: 490,
       child: transactions.isEmpty
           ? Column(
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -27,46 +27,32 @@ class TransactionList extends StatelessWidget {
               itemCount: transactions.length,
               itemBuilder: (ctx, index) {
                 return Card(
-                    color: Theme.of(context).primaryColorLight,
-                    elevation: 5,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        Container(
-                          width: 150,
-                          margin: EdgeInsets.symmetric(
-                              vertical: 10, horizontal: 15),
-                          // decoration: BoxDecoration(
-                          //     border: Border.all(color: Colors.purple, width: 1),
-                          //     color: Colors.purple[100]),
-                          padding: EdgeInsets.all(10),
-                          child: Text(
-                            '\u{20B9} ${transactions[index].amount.toStringAsFixed(2)}',
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 20,
-                                color: Theme.of(context).primaryColor),
+                  elevation: 5,
+                  margin: EdgeInsets.symmetric(vertical: 8, horizontal: 5),
+                  child: ListTile(
+                    leading: CircleAvatar(
+                        radius: 30,
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: FittedBox(
+                            child:
+                                Text('\u{20B9} ${transactions[index].amount}'),
                           ),
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              transactions[index].title,
-                              style: Theme.of(context).textTheme.headline6,
-                            ),
-                            Text(
-                              DateFormat.yMMMMd()
-                                  .format(transactions[index].date),
-                              style: TextStyle(
-                                color: Colors.blueGrey,
-                                fontFamily: 'Quicksand',
-                              ),
-                            )
-                          ],
-                        )
-                      ],
-                    ));
+                        )),
+                    title: Text(
+                      transactions[index].title,
+                      style: Theme.of(context).textTheme.headline6,
+                    ),
+                    subtitle: Text(
+                      DateFormat.yMMMd().format(transactions[index].date),
+                    ),
+                    trailing: IconButton(
+                      icon: Icon(Icons.delete),
+                      color: Theme.of(context).errorColor,
+                      onPressed: () => deleteTx(transactions[index].id),
+                    ),
+                  ),
+                );
               },
             ),
     );

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class NewTransaction extends StatefulWidget {
   final Function addTxHandler;
@@ -10,21 +11,37 @@ class NewTransaction extends StatefulWidget {
 }
 
 class _NewTransactionState extends State<NewTransaction> {
-  final titleController = TextEditingController();
+  final _titleController = TextEditingController();
+  final _amountController = TextEditingController();
+  DateTime _selectedDate;
 
-  final amountController = TextEditingController();
-
-  void submitData() {
-    final enteredTitle = titleController.text;
-    final enteredAmount = double.parse(amountController.text);
-
-    if (enteredTitle.isEmpty || enteredAmount <= 0) {
+  void _submitData() {
+    if (_amountController.text.isEmpty) {
       return;
     }
-    widget.addTxHandler(
-        titleController.text, double.parse(amountController.text));
+    final _enteredTitle = _titleController.text;
+    final _enteredAmount = double.parse(_amountController.text);
+
+    if (_enteredTitle.isEmpty || _enteredAmount <= 0 || _selectedDate == null) {
+      return;
+    }
+    widget.addTxHandler(_titleController.text,
+        double.parse(_amountController.text), _selectedDate);
 
     Navigator.of(context).pop();
+  }
+
+  void _presentDatePicker() {
+    showDatePicker(
+            context: context,
+            initialDate: DateTime.now(),
+            firstDate: DateTime(2020),
+            lastDate: DateTime.now())
+        .then((pickedDate) {
+      setState(() {
+        _selectedDate = pickedDate;
+      });
+    });
   }
 
   @override
@@ -48,8 +65,8 @@ class _NewTransactionState extends State<NewTransaction> {
                           borderSide: BorderSide(
                               color: Theme.of(context).primaryColor))),
                   cursorColor: Theme.of(context).primaryColor,
-                  controller: titleController,
-                  onSubmitted: (_) => submitData()
+                  controller: _titleController,
+                  onSubmitted: (_) => _submitData()
                   // onChanged: (value) {
                   //   titleInput = value;
                   // },
@@ -67,19 +84,39 @@ class _NewTransactionState extends State<NewTransaction> {
                         borderSide:
                             BorderSide(color: Theme.of(context).primaryColor))),
                 cursorColor: Theme.of(context).primaryColor,
-                controller: amountController,
+                controller: _amountController,
                 keyboardType: TextInputType.number,
-                onSubmitted: (_) => submitData(),
+                onSubmitted: (_) => _submitData(),
                 // onChanged: (value) {
                 //   amountInput = value;
                 // },
               ),
             ),
-            TextButton(
-              onPressed: submitData,
+            Padding(
+              padding: const EdgeInsets.fromLTRB(0, 8, 0, 8),
+              child: Row(
+                children: [
+                  TextButton(
+                    child: Text(
+                      'Choose Date',
+                      style: TextStyle(
+                          color: Theme.of(context).primaryColor,
+                          fontWeight: FontWeight.bold),
+                    ),
+                    onPressed: _presentDatePicker,
+                  ),
+                  Text(_selectedDate == null
+                      ? 'No Date Selected'
+                      : DateFormat.yMMMd().format(_selectedDate))
+                ],
+              ),
+            ),
+            ElevatedButton(
+              onPressed: _submitData,
               child: Text(
                 'Add',
-                style: TextStyle(color: Theme.of(context).primaryColor),
+                style: TextStyle(
+                    color: Theme.of(context).textTheme.button.backgroundColor),
               ),
             )
           ],
